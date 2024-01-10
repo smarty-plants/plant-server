@@ -1,4 +1,4 @@
-# SmartyPlans server
+# SmartyPlants Server
 
 ## Project setup
 ### Setup virtual env and pip.
