@@ -8,7 +8,7 @@ class Plant(models.Model):
         verbose_name = "Plant"
         verbose_name_plural = "Plants"
 
-    plant_id = models.UUIDField(primary_key=True, editable=False)
+    plant_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
     plant_species = models.CharField(max_length=200)
 
@@ -41,7 +41,7 @@ class Plant(models.Model):
     )
 
     def __str__(self):
-        return self.plant_id
+        return self.name
 
 
 class Probe(models.Model):
@@ -51,7 +51,7 @@ class Probe(models.Model):
     active = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.probe_id
+        return self.name
 
 
 class ProbeData(models.Model):

@@ -1,6 +1,7 @@
 import json
 from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
+from .models import ProbeData, Probe
 
 DATA_APPROVED = 1
 JSON_DECODE_ERROR = 2
@@ -16,6 +17,11 @@ ERROR_MESSAGES = {
 class ProbeConsumer(WebsocketConsumer):
     def connect(self):
         self.probe_id = self.scope["url_route"]["kwargs"]["probe_id"]
+        try:
+            if not Probe.objects.filter(probe_id=self.probe_id).exists():
+                self.close()
+        except:
+            self.close()
         self.room_group_name = "probe_%s" % self.probe_id
         async_to_sync(self.channel_layer.group_add)(
             self.room_group_name, self.channel_name
@@ -40,19 +46,28 @@ class ProbeConsumer(WebsocketConsumer):
                 {
                     "type": "error",
                     "code": JSON_DECODE_ERROR,
-                    "message": ERROR_MESSAGES[JSON_DECODE_ERROR],
+                    "error": ERROR_MESSAGES[JSON_DECODE_ERROR],
                 },
             )
-        # TODO validate probe data
-        if False:
+            return
+        if not check_data(text_data_json):
             async_to_sync(self.channel_layer.group_send)(
                 self.room_group_name,
                 {
                     "type": "error",
                     "code": DATA_NOT_VALID,
-                    "message": ERROR_MESSAGES[DATA_NOT_VALID],
+                    "error": ERROR_MESSAGES[DATA_NOT_VALID],
                 },
             )
+            return
+        probe_data = ProbeData(
+            probe_id=self.probe_id,
+            temperature=text_data_json["temperature"],
+            humidity=text_data_json["humidity"],
+            soil_moisture=text_data_json["soil_moisture"],
+            light_level=text_data_json["light_level"],
+        )
+        probe_data.save()
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
             {
@@ -71,3 +86,25 @@ class ProbeConsumer(WebsocketConsumer):
         print(event)
         message = event["message"]
         self.send(text_data=json.dumps(message))
+
+
+def check_data(data):
+    try:
+        if (
+            data["temperature"] == None
+            or data["humidity"] == None
+            or data["soil_moisture"] == None
+            or data["light_level"] == None
+        ):
+            return False
+        if float(data["temperature"]) > 100 or float(data["temperature"]) < -100:
+            return False
+        if float(data["humidity"]) > 100 or float(data["humidity"]) < 0:
+            return False
+        if float(data["soil_moisture"]) > 100 or float(data["soil_moisture"]) < 0:
+            return False
+        if float(data["light_level"]) > 100 or float(data["light_level"]) < 0:
+            return False
+    except:
+        return False
+    return True
