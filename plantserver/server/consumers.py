@@ -33,6 +33,7 @@ class ProbeConsumer(WebsocketConsumer):
     def receive(self, text_data):
         try:
             text_data_json = json.loads(text_data)
+            print(text_data_json)
         except json.decoder.JSONDecodeError:
             async_to_sync(self.channel_layer.group_send)(
                 self.room_group_name,
