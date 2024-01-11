@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WebSocket Test</title>
+  </head>
+  <body>
+
+    <div>
+      <h1>WebSocket Chat</h1>
+      <div
+        id="chat"
+        style="
+          height: 300px;
+          overflow-y: scroll;
+          border: 1px solid #ccc;
+          padding: 10px;
+        "
+      ></div>
+      <input
+        type="text"
+        id="hum"
+        placeholder="Hum"
+        style="margin-top: 10px"
+      />
+      <input
+        type="text"
+        id="mois"
+        placeholder="Moist"
+        style="margin-top: 10px"
+      />
+      <input
+        type="text"
+        id="temp"
+        placeholder="Temperature"
+        style="margin-top: 10px"
+      />
+      <input
+        type="text"
+        id="light"
+        placeholder="Light"
+        style="margin-top: 10px"
+      />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+      const socket = new WebSocket("ws://127.0.0.1:8000/ws/probe/001f1418-52fb-4b3c-bfc9-716f487ee26a/"); // Update the WebSocket path accordingly
+
+      // Connection opened
+      socket.addEventListener("open", (event) => {
+        console.log("WebSocket connection opened");
+      });
+
+      // Listen for messages
+      socket.addEventListener("message", (event) => {
+        console.log("Message from server:", event.data);
+        appendMessage(event.data);
+      });
+
+      // Connection closed
+      socket.addEventListener("close", (event) => {
+        console.log("WebSocket connection closed");
+      });
+
+      // Error handling
+      socket.addEventListener("error", (event) => {
+        console.error("WebSocket error:", event);
+      });
+
+      function sendMessage() {
+        const humInput = document.getElementById("hum");
+        const moisInput = document.getElementById("mois");
+        const tempInput = document.getElementById("temp");
+        const lightInput = document.getElementById("light");
+
+            var json = JSON.stringify({
+                "temperature": tempInput.value,
+                "humidity": humInput.value,
+                "soil_moisture": moisInput.value,
+                "light_level": lightInput.value,
+            });
+          socket.send(json);
+      }
+
+      function appendMessage(message) {
+        const chatDiv = document.getElementById("chat");
+        const messageDiv = document.createElement("div");
+        messageDiv.textContent = message;
+        chatDiv.appendChild(messageDiv);
+        chatDiv.scrollTop = chatDiv.scrollHeight; // Auto-scroll to the latest message
+      }
+    </script>
+  </body>
+</html>
