@@ -2,6 +2,7 @@ import json
 from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
 from .models import ProbeData, Probe
+import datetime
 
 DATA_APPROVED = 1
 JSON_DECODE_ERROR = 2
@@ -66,6 +67,7 @@ class ProbeConsumer(WebsocketConsumer):
             humidity=text_data_json["humidity"],
             soil_moisture=text_data_json["soil_moisture"],
             light_level=text_data_json["light_level"],
+            read_time=datetime.datetime.now(),
         )
         probe_data.save()
         async_to_sync(self.channel_layer.group_send)(

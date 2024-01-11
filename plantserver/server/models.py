@@ -64,7 +64,7 @@ class ProbeData(models.Model):
     humidity = models.FloatField()
     soil_moisture = models.FloatField()
     light_level = models.FloatField()
-    read_time = models.DateTimeField(auto_now_add=True)
+    read_time = models.DateTimeField()
 
     def __str__(self):
         return f"{self.probe} - {self.read_time}"
