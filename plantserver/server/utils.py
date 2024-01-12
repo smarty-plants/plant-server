@@ -1,5 +1,9 @@
 import datetime
 
+RED_ZONE_RATIO = 0.3
+ORANGE_ZONE_RATIO = 0.4
+YELLOW_ZONE_RATIO = 0.3
+
 def getDailyLight(data_list):
     if(len(data_list) == 0):
         return 0
@@ -22,5 +26,17 @@ def getFirst(data_list):
     else:
         return (data_list[0].humidity,data_list[0].temperature,data_list[0].soil_moisture,data_list[0].light_level)
 
+
+def generateRanges(min, max):
+    ranges = []
+    ranges.append(min * RED_ZONE_RATIO)
+    ranges.append(min * ORANGE_ZONE_RATIO)
+    ranges.append(min * YELLOW_ZONE_RATIO)
+    ranges.append(max - min)
+    space_left = 100 - max
+    ranges.append(space_left * YELLOW_ZONE_RATIO)
+    ranges.append(space_left * ORANGE_ZONE_RATIO)
+    ranges.append(space_left * RED_ZONE_RATIO)
+    return ranges
 
         

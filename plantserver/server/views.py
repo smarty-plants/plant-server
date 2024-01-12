@@ -10,7 +10,7 @@ from .models import Plant, Probe, ProbeData
 
 import datetime
 from .utils import *
-import json
+from time import sleep
 
 
 def websocket_view(request):
@@ -26,33 +26,51 @@ class PlantApiView(APIView):
 
 class ProbeDailyApiView(APIView):
     def get(self, request):
-        payload = []
+        payload = {}
+        payload["read_time"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         dateDayBefore = datetime.datetime.now() - datetime.timedelta(days=1)
         probes = Probe.objects.filter(active=True)
+        probes_data = []
         for x in probes:
             subPayload = {}
 
             data = ProbeData.objects.filter(
                 read_time__gt=dateDayBefore, probe=x.probe_id
-            )
+            ).order_by("read_time")
             plant = x.plant
 
             subPayload["id"] = str(x.probe_id)
             subPayload["name"] = x.name
             subPayload["plant"] = x.plant.name
-            subPayload["sunlight_procent"] = getDailyLight(data)
+            subPayload["plant_species"] = x.plant.plant_species
+            subPayload["last_read_time"] = data[0].read_time.strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
+            subPayload["sunlight_procent"] = getFirst(data)[3]
             subPayload["sunlight_min"] = plant.in_sunlight_procent_min
             subPayload["sunlight_max"] = plant.in_sunlight_procent_max
+            subPayload["sunlight_ranges"] = generateRanges(
+                plant.in_sunlight_procent_min, plant.in_sunlight_procent_max
+            )
             subPayload["humidity"] = getFirst(data)[0]
             subPayload["humidity_min"] = plant.humidity_min
             subPayload["humidity_max"] = plant.humidity_max
+            subPayload["humidity_ranges"] = generateRanges(
+                plant.humidity_min, plant.humidity_max
+            )
             subPayload["temperature"] = getFirst(data)[1]
             subPayload["temperature_min"] = plant.temperature_min
             subPayload["temperature_max"] = plant.temperature_max
+            subPayload["temperature_ranges"] = generateRanges(
+                plant.temperature_min, plant.temperature_max
+            )
             subPayload["soil_moisture"] = getFirst(data)[2]
             subPayload["soil_moisture_min"] = plant.soil_moisture_min
             subPayload["soil_moisture_max"] = plant.soil_moisture_max
+            subPayload["soil_moisture_ranges"] = generateRanges(
+                plant.soil_moisture_min, plant.soil_moisture_max
+            )
             subPayload["data"] = [
                 {
                     "time": y.read_time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -63,7 +81,7 @@ class ProbeDailyApiView(APIView):
                 }
                 for y in data
             ]
-            payload.append(subPayload)
+            probes_data.append(subPayload)
 
             """print("Sunlight")
             print(getDailyLight(data))
@@ -85,5 +103,6 @@ class ProbeDailyApiView(APIView):
             print(plant.soil_moisture_min)
             print(plant.soil_moisture_max)
             print([y.soil_moisture for y in data])"""
+        payload["data"] = probes_data
 
         return Response(payload)

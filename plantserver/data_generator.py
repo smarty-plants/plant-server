@@ -23,14 +23,14 @@ def generate_plants():
         Plant.objects.create(
             name=flower,
             plant_species=flower + " sp.",
-            temperature_min=myfaker.pyfloat(min_value=0.0, max_value=100.0),
-            temperature_max=myfaker.pyfloat(min_value=0.0, max_value=100.0),
-            in_sunlight_procent_min=myfaker.pyfloat(min_value=0.0, max_value=100.0),
-            in_sunlight_procent_max=myfaker.pyfloat(min_value=0.0, max_value=100.0),
-            humidity_min=myfaker.pyfloat(min_value=0.0, max_value=100.0),
-            humidity_max=myfaker.pyfloat(min_value=0.0, max_value=100.0),
-            soil_moisture_min=myfaker.pyfloat(min_value=0.0, max_value=100.0),
-            soil_moisture_max=myfaker.pyfloat(min_value=0.0, max_value=100.0),
+            temperature_min=myfaker.pyfloat(min_value=0.0, max_value=50.0),
+            temperature_max=myfaker.pyfloat(min_value=50.0, max_value=100.0),
+            in_sunlight_procent_min=myfaker.pyfloat(min_value=0.0, max_value=50.0),
+            in_sunlight_procent_max=myfaker.pyfloat(min_value=50.0, max_value=100.0),
+            humidity_min=myfaker.pyfloat(min_value=0.0, max_value=50.0),
+            humidity_max=myfaker.pyfloat(min_value=50.0, max_value=100.0),
+            soil_moisture_min=myfaker.pyfloat(min_value=0.0, max_value=50.0),
+            soil_moisture_max=myfaker.pyfloat(min_value=50.0, max_value=100.0),
         )
 
 def generate_probes():
