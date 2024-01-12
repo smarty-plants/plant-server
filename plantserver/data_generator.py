@@ -20,7 +20,7 @@ def generate_plants():
     ]
     
     for flower in flowers:
-        plant = Plant.objects.create(
+        Plant.objects.create(
             name=flower,
             plant_species=flower + " sp.",
             temperature_min=myfaker.pyfloat(min_value=0.0, max_value=100.0),
@@ -38,7 +38,7 @@ def generate_probes():
 
     plants = Plant.objects.all()
     for index, plant in enumerate(plants):
-            probe = Probe.objects.create(
+            Probe.objects.create(
                 name="Probe " + str(index+1),
                 plant=plant,
                 active=True,
