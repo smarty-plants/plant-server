@@ -26,37 +26,44 @@ class PlantApiView(APIView):
 
 class ProbeDailyApiView(APIView):
     def get(self, request):
-        payload = {}
+        payload = []
 
         dateDayBefore = datetime.datetime.now() - datetime.timedelta(days=1)
         probes = Probe.objects.filter(active=True)
         for x in probes:
             subPayload = {}
 
-            data = ProbeData.objects.filter(read_time__gt = dateDayBefore,probe = x.probe_id)
+            data = ProbeData.objects.filter(
+                read_time__gt=dateDayBefore, probe=x.probe_id
+            )
             plant = x.plant
 
+            subPayload["id"] = str(x.probe_id)
+            subPayload["name"] = x.name
+            subPayload["plant"] = x.plant.name
             subPayload["sunlight_procent"] = getDailyLight(data)
             subPayload["sunlight_min"] = plant.in_sunlight_procent_min
             subPayload["sunlight_max"] = plant.in_sunlight_procent_max
-            subPayload["sunlight_readings"] = [y.light_level for y in data]
-            
             subPayload["humidity"] = getFirst(data)[0]
             subPayload["humidity_min"] = plant.humidity_min
             subPayload["humidity_max"] = plant.humidity_max
-            subPayload["humidity_readings"] = [y.humidity for y in data]
-
             subPayload["temperature"] = getFirst(data)[1]
             subPayload["temperature_min"] = plant.temperature_min
             subPayload["temperature_max"] = plant.temperature_max
-            subPayload["temperature_readings"] = [y.temperature for y in data]
-
             subPayload["soil_moisture"] = getFirst(data)[2]
             subPayload["soil_moisture_min"] = plant.soil_moisture_min
             subPayload["soil_moisture_max"] = plant.soil_moisture_max
-            subPayload["soil_moisture_readings"] = [y.soil_moisture for y in data]
-
-            payload[str(x.probe_id)] = subPayload
+            subPayload["data"] = [
+                {
+                    "time": y.read_time.strftime("%Y-%m-%d %H:%M:%S"),
+                    "Temperature": y.temperature,
+                    "Humidity": y.humidity,
+                    "Light level": y.light_level,
+                    "Mouisture of soil": y.soil_moisture,
+                }
+                for y in data
+            ]
+            payload.append(subPayload)
 
             """print("Sunlight")
             print(getDailyLight(data))
@@ -79,6 +86,4 @@ class ProbeDailyApiView(APIView):
             print(plant.soil_moisture_max)
             print([y.soil_moisture for y in data])"""
 
-        
-        
         return Response(payload)
