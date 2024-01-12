@@ -4,6 +4,7 @@ import random
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "plantserver.settings")
 import django
 from tqdm import tqdm
+from django.utils import timezone
 
 django.setup()
 from faker import Faker
@@ -62,7 +63,7 @@ def generate_probe_data(for_how_many_days=3):
                         humidity=last_humidity,
                         soil_moisture=last_soil_moisture,
                         light_level=last_light_level,
-                        read_time=datetime.now() - timedelta(days=day, hours=hour, minutes=minute),
+                        read_time=timezone.now() - timedelta(days=day, hours=hour, minutes=minute),
                     )
                     last_temperature += random.uniform(-1, 1)
                     last_humidity += random.uniform(-1, 1)
