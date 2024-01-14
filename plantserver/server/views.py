@@ -145,3 +145,65 @@ class ProbeCurrentReadingsApiView(APIView):
         payload["data"] = probes_data
 
         return Response(payload)
+    
+
+class ProbeDetailApiView(APIView):
+    def get(self, request, probe_id):
+        payload = {}
+        payload["read_time"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        dateDayBefore = datetime.datetime.now() - datetime.timedelta(days=1)
+        probe = Probe.objects.get(probe_id=probe_id)
+        subPayload = {}
+
+        data = ProbeData.objects.filter(
+            read_time__gt=dateDayBefore, probe=probe_id
+        ).order_by("read_time")
+        plant = probe.plant
+
+        subPayload["id"] = str(probe.probe_id)
+        subPayload["name"] = probe.name
+        subPayload["plant"] = probe.plant.name
+        subPayload["is_active"] = probe.active
+        subPayload["plant_species"] = probe.plant.plant_species
+        subPayload["last_read_time"] = data[0].read_time.strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
+        subPayload["sunlight_procent"] = getFirst(data)[3]
+        subPayload["sunlight_min"] = plant.in_sunlight_procent_min
+        subPayload["sunlight_max"] = plant.in_sunlight_procent_max
+        subPayload["sunlight_ranges"] = generateRanges(
+            plant.in_sunlight_procent_min, plant.in_sunlight_procent_max
+        )
+        subPayload["humidity"] = getFirst(data)[0]
+        subPayload["humidity_min"] = plant.humidity_min
+        subPayload["humidity_max"] = plant.humidity_max
+        subPayload["humidity_ranges"] = generateRanges(
+            plant.humidity_min, plant.humidity_max
+        )
+        subPayload["temperature"] = getFirst(data)[1]
+        subPayload["temperature_min"] = plant.temperature_min
+        subPayload["temperature_max"] = plant.temperature_max
+        subPayload["temperature_ranges"] = generateRanges(
+            plant.temperature_min, plant.temperature_max
+        )
+        subPayload["soil_moisture"] = getFirst(data)[2]
+        subPayload["soil_moisture_min"] = plant.soil_moisture_min
+        subPayload["soil_moisture_max"] = plant.soil_moisture_max
+        subPayload["soil_moisture_ranges"] = generateRanges(
+            plant.soil_moisture_min, plant.soil_moisture_max
+        )
+        subPayload["data"] = [
+                {
+                    "id": y.pk,
+                    "time": y.read_time.strftime("%Y-%m-%d %H:%M:%S"),
+                    "Temperature": y.temperature,
+                    "Humidity": y.humidity,
+                    "Light level": y.light_level,
+                    "Mouisture of soil": y.soil_moisture,
+                }
+                for y in data
+            ]
+        payload["data"] = subPayload
+        
+        return Response(payload)

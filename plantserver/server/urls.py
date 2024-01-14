@@ -6,4 +6,5 @@ urlpatterns = [
     path("plants/", views.PlantApiView.as_view()),
     path("probes/daily/", views.ProbeDailyApiView.as_view()),
     path("probes/current/", views.ProbeCurrentReadingsApiView.as_view()),
+    path("probes/details/<str:probe_id>/", views.ProbeDetailApiView.as_view()),
 ]
