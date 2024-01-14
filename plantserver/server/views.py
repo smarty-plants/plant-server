@@ -46,9 +46,12 @@ class ProbeDailyApiView(APIView):
             subPayload["plant"] = x.plant.name
             subPayload["is_active"] = x.active
             subPayload["plant_species"] = x.plant.plant_species
-            subPayload["last_read_time"] = data[0].read_time.strftime(
-                "%Y-%m-%d %H:%M:%S"
-            )
+            if(len(data) == 0):
+                subPayload["last_read_time"] = None
+            else:
+                subPayload["last_read_time"] = data[0].read_time.strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
             subPayload["sunlight_procent"] = getFirst(data)[3]
             subPayload["sunlight_min"] = plant.in_sunlight_procent_min
             subPayload["sunlight_max"] = plant.in_sunlight_procent_max
@@ -242,7 +245,7 @@ class ProbeCreateView(APIView):
             probe_created = Probe(
                     name=probe_name,
                     plant=plant,
-                    active=True,
+                    active=False,
                 )
             
             probe_created.full_clean()
