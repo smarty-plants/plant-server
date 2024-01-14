@@ -39,4 +39,16 @@ def generateRanges(min, max):
     ranges.append(space_left * RED_ZONE_RATIO)
     return ranges
 
-        
+def getValueStatus(value, min, max):
+    if value < min:
+        if value < min * 0.8:
+            return "decrease"
+        else:
+            return "moderateDecrease"
+    elif value > max:
+        if value > max * 1.2:
+            return "increase"
+        else:
+            return "moderateIncrease"
+    else:
+        return "normal"

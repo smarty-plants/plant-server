@@ -30,7 +30,7 @@ class ProbeDailyApiView(APIView):
         payload["read_time"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         dateDayBefore = datetime.datetime.now() - datetime.timedelta(days=1)
-        probes = Probe.objects.filter(active=True)
+        probes = Probe.objects.all()
         probes_data = []
         for x in probes:
             subPayload = {}
@@ -43,6 +43,7 @@ class ProbeDailyApiView(APIView):
             subPayload["id"] = str(x.probe_id)
             subPayload["name"] = x.name
             subPayload["plant"] = x.plant.name
+            subPayload["is_active"] = x.active
             subPayload["plant_species"] = x.plant.plant_species
             subPayload["last_read_time"] = data[0].read_time.strftime(
                 "%Y-%m-%d %H:%M:%S"
@@ -103,6 +104,44 @@ class ProbeDailyApiView(APIView):
             print(plant.soil_moisture_min)
             print(plant.soil_moisture_max)
             print([y.soil_moisture for y in data])"""
+        payload["data"] = probes_data
+
+        return Response(payload)
+
+class ProbeCurrentReadingsApiView(APIView):
+    def get(self, request):
+        payload = {}
+        payload["read_time"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        dateDayBefore = datetime.datetime.now() - datetime.timedelta(days=1)
+        probes = Probe.objects.all()
+        probes_data = []
+        for x in probes:
+            subPayload = {}
+
+            data = ProbeData.objects.filter(
+                read_time__gt=dateDayBefore, probe=x.probe_id
+            ).order_by("read_time")
+            plant = x.plant
+
+            subPayload["id"] = str(x.probe_id)
+            subPayload["name"] = x.name
+            subPayload["plant"] = x.plant.name
+            subPayload["is_active"] = x.active
+            subPayload["plant_species"] = x.plant.plant_species
+            subPayload["last_read_time"] = data[0].read_time.strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
+            last_reading = getFirst(data)
+            subPayload["sunlight_procent"] = last_reading[3]
+            subPayload["sunlight_status"] = getValueStatus(last_reading[3], plant.in_sunlight_procent_min, plant.in_sunlight_procent_max)
+            subPayload["humidity"] = last_reading[0]
+            subPayload["humidity_status"] = getValueStatus(last_reading[0], plant.humidity_min, plant.humidity_max)
+            subPayload["temperature"] = last_reading[1]
+            subPayload["temperature_status"] = getValueStatus(last_reading[1], plant.temperature_min, plant.temperature_max)
+            subPayload["soil_moisture"] = last_reading[2]
+            subPayload["soil_moisture_status"] = getValueStatus(last_reading[2], plant.soil_moisture_min, plant.soil_moisture_max)
+            probes_data.append(subPayload)
         payload["data"] = probes_data
 
         return Response(payload)
