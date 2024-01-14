@@ -7,6 +7,30 @@ class Plant(models.Model):
     class Meta:
         verbose_name = "Plant"
         verbose_name_plural = "Plants"
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(temperature_min__lte=models.F("temperature_max")),
+                name="temperature_min_lte_temperature_max",
+                violation_error_message="temperature_min must be less than temperature_max",
+            ),
+            models.CheckConstraint(
+                check=models.Q(
+                    in_sunlight_procent_min__lte=models.F("in_sunlight_procent_max")
+                ),
+                name="in_sunlight_procent_min_lte_in_sunlight_procent_max",
+                violation_error_message="in_sunlight_procent_min must be less than in_sunlight_procent_max",
+            ),
+            models.CheckConstraint(
+                check=models.Q(humidity_min__lte=models.F("humidity_max")),
+                name="humidity_min_lte_humidity_max",
+                violation_error_message="humidity_min must be less than humidity_max",
+            ),
+            models.CheckConstraint(
+                check=models.Q(soil_moisture_min__lte=models.F("soil_moisture_max")),
+                name="soil_moisture_min_lte_soil_moisture_max",
+                violation_error_message="soil_moisture_min must be less than soil_moisture_max",
+            ),
+        ]
 
     plant_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
@@ -60,11 +84,19 @@ class ProbeData(models.Model):
         verbose_name_plural = "Probe Data"
     
     probe = models.ForeignKey(Probe, on_delete=models.CASCADE)
-    temperature = models.FloatField()
-    humidity = models.FloatField()
-    soil_moisture = models.FloatField()
-    light_level = models.FloatField()
-    read_time = models.DateTimeField(auto_now_add=True)
+    temperature = models.FloatField(
+        validators=[MinValueValidator(-100.0), MaxValueValidator(100.0)]
+    )
+    humidity = models.FloatField(
+        validators=[MinValueValidator(0.0), MaxValueValidator(100.0)]
+    )
+    soil_moisture = models.FloatField(
+        validators=[MinValueValidator(0.0), MaxValueValidator(100.0)]
+    )
+    light_level = models.FloatField(
+        validators=[MinValueValidator(0.0), MaxValueValidator(100.0)]
+    )
+    read_time = models.DateTimeField()
 
     def __str__(self):
         return f"{self.probe} - {self.read_time}"

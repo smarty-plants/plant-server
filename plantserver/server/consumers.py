@@ -2,6 +2,7 @@ import json
 from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
 from .models import ProbeData, Probe
+import datetime
 
 DATA_APPROVED = 1
 JSON_DECODE_ERROR = 2
@@ -22,6 +23,8 @@ class ProbeConsumer(WebsocketConsumer):
                 self.close()
         except:
             self.close()
+        Probe.objects.get(probe_id=self.probe_id).active = True
+        Probe.objects.get(probe_id=self.probe_id).save()
         self.room_group_name = "probe_%s" % self.probe_id
         async_to_sync(self.channel_layer.group_add)(
             self.room_group_name, self.channel_name
@@ -29,6 +32,8 @@ class ProbeConsumer(WebsocketConsumer):
         self.accept()
 
     def disconnect(self, code):
+        Probe.objects.get(probe_id=self.probe_id).active = False
+        Probe.objects.get(probe_id=self.probe_id).save()
         async_to_sync(
             self.channel_layer.group_discard(
                 self.room_group_name,
@@ -66,6 +71,7 @@ class ProbeConsumer(WebsocketConsumer):
             humidity=text_data_json["humidity"],
             soil_moisture=text_data_json["soil_moisture"],
             light_level=text_data_json["light_level"],
+            read_time=datetime.datetime.now(),
         )
         probe_data.save()
         async_to_sync(self.channel_layer.group_send)(
