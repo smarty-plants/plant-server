@@ -133,9 +133,12 @@ class ProbeCurrentReadingsApiView(APIView):
             subPayload["plant"] = x.plant.name
             subPayload["is_active"] = x.active
             subPayload["plant_species"] = x.plant.plant_species
-            subPayload["last_read_time"] = data[0].read_time.strftime(
-                "%Y-%m-%d %H:%M:%S"
-            )
+            if len(data) == 0:
+                subPayload["last_read_time"] = None
+            else:
+                subPayload["last_read_time"] = data[0].read_time.strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
             last_reading = getFirst(data)
             subPayload["sunlight_procent"] = last_reading[3]
             subPayload["sunlight_status"] = getValueStatus(last_reading[3], plant.in_sunlight_procent_min, plant.in_sunlight_procent_max)
@@ -170,9 +173,12 @@ class ProbeDetailApiView(APIView):
         subPayload["plant"] = probe.plant.name
         subPayload["is_active"] = probe.active
         subPayload["plant_species"] = probe.plant.plant_species
-        subPayload["last_read_time"] = data[0].read_time.strftime(
-            "%Y-%m-%d %H:%M:%S"
-        )
+        if len(data) == 0:
+            subPayload["last_read_time"] = None
+        else:
+            subPayload["last_read_time"] = data[0].read_time.strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
         subPayload["sunlight_procent"] = getFirst(data)[3]
         subPayload["sunlight_min"] = plant.in_sunlight_procent_min
         subPayload["sunlight_max"] = plant.in_sunlight_procent_max
