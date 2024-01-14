@@ -11,6 +11,7 @@ from .models import Plant, Probe, ProbeData
 import datetime
 from .utils import *
 from time import sleep
+import uuid
 
 
 def websocket_view(request):
@@ -207,3 +208,106 @@ class ProbeDetailApiView(APIView):
         payload["data"] = subPayload
         
         return Response(payload)
+    
+
+class ProbeCreateView(APIView):
+    def post(self,request):
+        data = request.data
+        probe_name = data.get('probe_name',None)
+        plant_id = data.get('plant_id',None)
+
+        if(probe_name is None or plant_id is None):
+            return Response(
+                    {"status": "failed", "message": f"Bad/Uncomplete request"}
+                    ,status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        try:
+            uuid_obj = uuid.UUID(plant_id)
+        except Exception as e:
+            return Response(
+                    {"status": "failed", "message": f"Wrong plant UUID"}
+                    ,status=status.HTTP_422_UNPROCESSABLE_ENTITY
+                )
+
+        plant = Plant.objects.get(plant_id=plant_id)
+
+        if(plant is None):
+            return Response(
+                    {"status": "failed", "message": f"Plant not found"}
+                    ,status=status.HTTP_409_CONFLICT
+                )
+        
+        try:
+            probe_created = Probe(
+                    name=probe_name,
+                    plant=plant,
+                    active=True,
+                )
+            
+            probe_created.full_clean()
+        except Exception as e:
+            return Response(
+                    {"status": "failed", "message": f"Error occurred during probe creation"}
+                    ,status=status.HTTP_422_UNPROCESSABLE_ENTITY
+                )
+        else:
+            probe_created.save()
+            return Response(
+                        {"status": "success","probe_id":str(probe_created.probe_id),"message": f"Successfully create probe {probe_name}"}
+                        ,status=status.HTTP_201_CREATED
+                    )
+        
+
+class PlantCreateView(APIView):
+    def post(self,request):
+        data = request.data
+        
+        dict = {
+            'name': data.get('name',None),
+            'plant_species': data.get('plant_species',None),
+            'temperature_min':data.get('temperature_min',None),
+            'temperature_max':data.get('temperature_max',None),
+            'in_sunlight_procent_min':data.get('in_sunlight_procent_min',None),
+            'in_sunlight_procent_max':data.get('in_sunlight_procent_max',None),
+            'humidity_min':data.get('humidity_min',None),
+            'humidity_max':data.get('humidity_max',None),
+            'soil_moisture_min':data.get('soil_moisture_min',None),
+            'soil_moisture_max':data.get('soil_moisture_max',None),
+        }
+
+        for x in dict:
+            if(dict[x] is None):
+                return Response(
+                    {"status": "failed", "message": f"Bad/Uncomplete request"}
+                    ,status=status.HTTP_400_BAD_REQUEST
+                )
+            
+        try:
+            plant_created = Plant(
+                    name=dict['name'],
+                    plant_species=dict['plant_species'],
+                    temperature_min=dict['temperature_min'],
+                    temperature_max=dict['temperature_max'],
+                    in_sunlight_procent_min=dict['in_sunlight_procent_min'],
+                    in_sunlight_procent_max=dict['in_sunlight_procent_max'],
+                    humidity_min=dict['humidity_min'],
+                    humidity_max=dict['humidity_max'],
+                    soil_moisture_min=dict['soil_moisture_min'],
+                    soil_moisture_max=dict['soil_moisture_max'],
+                )
+            
+            plant_created.full_clean()
+        except Exception as e:
+            return Response(
+                    {"status": "failed", "message": f"Error occurred during plant creation"}
+                    ,status=status.HTTP_422_UNPROCESSABLE_ENTITY
+                )
+        else:
+            plant_created.save()
+            return Response(
+                        {"status": "success","plant_id":str(plant_created.plant_id),"message": f"Successfully create plant {dict['name']}"}
+                        ,status=status.HTTP_201_CREATED
+                    )
+
+        
