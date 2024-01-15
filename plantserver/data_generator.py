@@ -55,20 +55,20 @@ def generate_probe_data(for_how_many_days=3):
         last_soil_moisture = myfaker.pyfloat(min_value=0.0, max_value=100.0)
         last_light_level = myfaker.pyfloat(min_value=0.0, max_value=100.0)
         for day in tqdm(range(for_how_many_days)):
-            for hour in range(24):
-                for minute in range(60):
+            for hour in tqdm(range(24)):
+                for minute in range(30):
                     ProbeData.objects.create(
                         probe_id=probe.probe_id,
                         temperature=last_temperature,
                         humidity=last_humidity,
                         soil_moisture=last_soil_moisture,
                         light_level=last_light_level,
-                        read_time=timezone.now() - timedelta(days=day, hours=hour, minutes=minute),
+                        read_time=timezone.now() - timedelta(days=day, hours=hour, minutes=minute*2),
                     )
-                    last_temperature += random.uniform(-1, 1)
-                    last_humidity += random.uniform(-1, 1)
-                    last_soil_moisture += random.uniform(-1, 1)
-                    last_light_level += random.uniform(-1, 1)
+                    last_temperature += random.uniform(-0.5, 0.5)
+                    last_humidity += random.uniform(-0.5, 0.5)
+                    last_soil_moisture += random.uniform(-0.5, 0.5)
+                    last_light_level += random.uniform(-0.5, 0.5)
                     if last_temperature > 35:
                         last_temperature = 35
                     if last_temperature < 20:

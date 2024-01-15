@@ -70,9 +70,9 @@ class Plant(models.Model):
 
 class Probe(models.Model):
     probe_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=200)
-    plant = models.ForeignKey(Plant, on_delete=models.CASCADE)
-    active = models.BooleanField(default=True)
+    name = models.CharField(max_length=200, default="Probe")
+    plant = models.ForeignKey(Plant, on_delete=models.CASCADE, null=True, blank=True)
+    active = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name

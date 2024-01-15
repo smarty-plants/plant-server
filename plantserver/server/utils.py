@@ -52,3 +52,27 @@ def getValueStatus(value, min, max):
             return "moderateIncrease"
     else:
         return "normal"
+    
+def getDataForEmptyPlant():
+    data = {}
+    data["plant"] = "No plant selected"
+    data["plant_species"] = "-"
+    data["last_read_time"] = "-"
+    data["sunlight_procent"] = 0
+    data["sunlight_min"] = 0
+    data["sunlight_max"] = 0
+    data["sunlight_ranges"] = generateRanges(0,0)
+    data["humidity"] = 0
+    data["humidity_min"] = 0
+    data["humidity_max"] = 0
+    data["humidity_ranges"] = generateRanges(0,0)
+    data["temperature"] = 0
+    data["temperature_min"] = 0
+    data["temperature_max"] = 0
+    data["temperature_ranges"] = generateRanges(0,0)
+    data["soil_moisture"] = 0
+    data["soil_moisture_min"] = 0
+    data["soil_moisture_max"] = 0
+    data["soil_moisture_ranges"] = generateRanges(0,0)
+    data["data"] = []
+    return data
