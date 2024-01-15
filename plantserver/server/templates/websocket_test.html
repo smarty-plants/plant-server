@@ -44,7 +44,7 @@
     </div>
 
     <script>
-      const socket = new WebSocket("ws://127.0.0.1:8000/ws/probe/001f1418-52fb-4b3c-bfc9-716f487ee26a/"); // Update the WebSocket path accordingly
+      const socket = new WebSocket("ws://" + window.location.host+ "/ws/probe/eafc0dff-f0db-41dc-900c-5c6413ee4c9c/"); // Update the WebSocket path accordingly
 
       // Connection opened
       socket.addEventListener("open", (event) => {

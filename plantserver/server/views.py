@@ -159,13 +159,10 @@ class ProbeDetailApiView(APIView):
         payload = {}
         payload["read_time"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        dateDayBefore = datetime.datetime.now() - datetime.timedelta(days=1)
         probe = Probe.objects.get(probe_id=probe_id)
         subPayload = {}
 
-        data = ProbeData.objects.filter(
-            read_time__gt=dateDayBefore, probe=probe_id
-        ).order_by("read_time")
+        data = ProbeData.objects.filter().order_by("read_time")
         plant = probe.plant
 
         subPayload["id"] = str(probe.probe_id)

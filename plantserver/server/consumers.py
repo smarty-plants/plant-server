@@ -23,8 +23,9 @@ class ProbeConsumer(WebsocketConsumer):
                 self.close()
         except:
             self.close()
-        Probe.objects.get(probe_id=self.probe_id).active = True
-        Probe.objects.get(probe_id=self.probe_id).save()
+        self.probe = Probe.objects.get(probe_id=self.probe_id)
+        self.probe.active = True
+        self.probe.save()
         self.room_group_name = "probe_%s" % self.probe_id
         async_to_sync(self.channel_layer.group_add)(
             self.room_group_name, self.channel_name
@@ -32,8 +33,8 @@ class ProbeConsumer(WebsocketConsumer):
         self.accept()
 
     def disconnect(self, code):
-        Probe.objects.get(probe_id=self.probe_id).active = False
-        Probe.objects.get(probe_id=self.probe_id).save()
+        self.probe.active = False
+        self.probe.save()
         async_to_sync(
             self.channel_layer.group_discard(
                 self.room_group_name,
