@@ -279,3 +279,7 @@ class ProbeDetailApi(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors)
+
+class CheckApi(APIView):
+    def get(self, request):
+        return Response({"status": "ok"})
