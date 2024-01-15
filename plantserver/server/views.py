@@ -235,8 +235,8 @@ class PlantCreateView(APIView):
 
 
 class CheckProbeApi(APIView):
-    def get(self, request):
-        uuid = request.query_params.get("uuid", None)
+    def post(self, request):
+        uuid = request.data.get("uuid")
         if uuid is None:
             return Response(
                 {"status": "failed", "message": f"Bad/Uncomplete request"},
