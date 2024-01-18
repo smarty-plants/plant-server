@@ -24,7 +24,8 @@ def getFirst(data_list):
     if(len(data_list) == 0):
         return (0,0,0,0)
     else:
-        return (data_list[0].humidity,data_list[0].temperature,data_list[0].soil_moisture,data_list[0].light_level)
+        x = len(data_list)-1
+        return (data_list[x].humidity,data_list[x].temperature,data_list[x].soil_moisture,data_list[x].light_level)
 
 
 def generateRanges(min, max):

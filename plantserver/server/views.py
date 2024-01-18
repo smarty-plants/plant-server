@@ -52,7 +52,7 @@ class ProbeDailyApiView(APIView):
                 if len(data) == 0:
                     subPayload["last_read_time"] = None
                 else:
-                    subPayload["last_read_time"] = data[0].read_time.strftime(
+                    subPayload["last_read_time"] = data[len(data) - 1].read_time.strftime(
                         "%Y-%m-%d %H:%M:%S"
                     )
                 subPayload["sunlight_procent"] = getFirst(data)[3]
@@ -123,7 +123,7 @@ class ProbeCurrentReadingsApiView(APIView):
                 if len(data) == 0:
                     subPayload["last_read_time"] = None
                 else:
-                    subPayload["last_read_time"] = data[0].read_time.strftime(
+                    subPayload["last_read_time"] = data[len(data) - 1].read_time.strftime(
                         "%Y-%m-%d %H:%M:%S"
                     )
                 last_reading = getFirst(data)
@@ -173,7 +173,7 @@ class ProbeDetailApiView(APIView):
             if len(data) == 0:
                 subPayload["last_read_time"] = None
             else:
-                subPayload["last_read_time"] = data[0].read_time.strftime(
+                subPayload["last_read_time"] = data[len(data) - 1].read_time.strftime(
                     "%Y-%m-%d %H:%M:%S"
                 )
             subPayload["sunlight_procent"] = getFirst(data)[3]
@@ -279,6 +279,7 @@ class ProbeDetailApi(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors)
+
 
 class CheckApi(APIView):
     def get(self, request):

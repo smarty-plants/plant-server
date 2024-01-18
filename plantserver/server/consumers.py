@@ -17,12 +17,17 @@ ERROR_MESSAGES = {
 
 class ProbeConsumer(WebsocketConsumer):
     def connect(self):
+        self.probe = None
         self.probe_id = self.scope["url_route"]["kwargs"]["probe_id"]
         try:
             if not Probe.objects.filter(probe_id=self.probe_id).exists():
+                self.room_group_name = "probe_%s" % self.probe_id
                 self.close()
+                return
         except:
+            self.room_group_name = "probe_%s" % self.probe_id
             self.close()
+            return
         self.probe = Probe.objects.get(probe_id=self.probe_id)
         self.probe.active = True
         self.probe.save()
@@ -33,8 +38,9 @@ class ProbeConsumer(WebsocketConsumer):
         self.accept()
 
     def disconnect(self, code):
-        self.probe.active = False
-        self.probe.save()
+        if self.probe:
+            self.probe.active = False
+            self.probe.save()
         async_to_sync(
             self.channel_layer.group_discard(
                 self.room_group_name,
